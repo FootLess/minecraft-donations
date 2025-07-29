@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>События на стриме Minecraft</title>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <style>
+    body {
+      background: #211c2b;
+      color: #fff;
+      font-family: 'Press Start 2P', Arial, sans-serif;
+      margin: 0; padding: 0;
+    }
+    h1 {
+      text-align: center;
+      margin-top: 32px;
+      font-size: 2rem;
+      color: #ffe77a;
+      text-shadow: 2px 2px 8px #000;
+    }
+    .events {
+      max-width: 1080px;
+      margin: 40px auto 0 auto;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 36px;
+      justify-content: center;
+    }
+    .event-card {
+      background: #312c40cc;
+      border-radius: 18px;
+      box-shadow: 0 2px 10px #000a;
+      padding: 24px 18px;
+      width: 210px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      transition: transform .14s;
+      position: relative;
+    }
+    .event-card:hover {
+      transform: scale(1.05) rotate(-2deg);
+      box-shadow: 0 8px 20px #000b;
+      z-index: 1;
+    }
+    .event-card img {
+      width: 90px; height: 90px;
+      margin-bottom: 10px;
+      border-radius: 10px;
+      background: #26222c;
+      box-shadow: 0 0 0 4px #2a2440;
+    }
+    .event-title {
+      font-size: 1.12rem;
+      color: #ffe77a;
+      margin-bottom: 7px;
+    }
+    .event-price {
+      font-size: 1.08rem;
+      color: #90ffae;
+      margin-bottom: 13px;
+      font-weight: bold;
+    }
+    .event-btn {
+      font-size: 1rem;
+      background: #7cd3ff;
+      color: #1a1430;
+      border: none;
+      border-radius: 9px;
+      padding: 8px 17px;
+      font-family: inherit;
+      cursor: pointer;
+      margin-bottom: 4px;
+      margin-top: auto;
+      font-weight: bold;
+      transition: background .13s, color .13s;
+    }
+    .event-btn:hover {
+      background: #ffe77a;
+      color: #202;
+    }
+    .modal-bg {
+      display: none;
+      position: fixed;
+      top:0; left:0; right:0; bottom:0;
+      background: #151221d6;
+      z-index: 100;
+      justify-content: center;
+      align-items: center;
+    }
+    .modal-bg.active {
+      display: flex;
+    }
+    .modal {
+      background: #282034;
+      padding: 35px 26px;
+      border-radius: 16px;
+      box-shadow: 0 4px 40px #000b;
+      min-width: 330px;
+      max-width: 90vw;
+      text-align: center;
+      position: relative;
+      color: #ffe77a;
+      font-size: 1rem;
+      animation: pop-in .18s cubic-bezier(.23,1.3,.5,1.03);
+    }
+    @keyframes pop-in {
+      from {transform:scale(.6) translateY(60px);}
+      to {transform:scale(1) translateY(0);}
+    }
+    .modal img { width: 112px; height: 112px; margin-bottom: 18px;}
+    .modal-title {font-size:1.25rem; margin-bottom: 7px;}
+    .modal-desc {color:#c1e0fd; font-size:.99rem; margin-bottom: 16px;}
+    .modal-close {
+      position: absolute;
+      top: 13px; right: 15px;
+      color: #fff; background: #564788; border: none;
+      font-size: 1.2rem;
+      border-radius: 8px; cursor: pointer;
+      width: 32px; height: 32px;
+      font-family: inherit;
+      font-weight: bold;
+    }
+    .modal-donate {
+      background: #7cd3ff;
+      color: #161;
+      border-radius: 9px;
+      padding: 10px 27px;
+      font-size: 1rem;
+      font-weight: bold;
+      border: none;
+      cursor: pointer;
+      margin-top: 5px;
+    }
+    .howto {
+      max-width: 700px;
+      background: #191526e0;
+      margin: 48px auto 32px;
+      border-radius: 12px;
+      padding: 23px 29px;
+      color: #fff;
+      font-size: 1.1rem;
+      box-shadow: 0 4px 40px #000b;
+    }
+    .bonus-follow {
+      background: #ffe77a;
+      color: #2d174d;
+      font-weight: bold;
+      border-radius: 9px;
+      padding: 12px 15px;
+      text-align: center;
+      max-width: 370px;
+      margin: 25px auto 0;
+      font-size: 1.1rem;
+      letter-spacing: .03em;
+      box-shadow: 0 2px 10px #000a;
+    }
+    @media (max-width:800px) {
+      .events {gap:16px;}
+      .event-card {width:44vw; min-width:180px;}
+      .modal {min-width:180px;}
+    }
+    @media (max-width:600px) {
+      h1 {font-size:1.15rem;}
+      .event-card {width:94vw; min-width:120px; padding:13px 6px;}
+    }
+  </style>
+</head>
+<body>
+  <h1>События на стриме Minecraft</h1>
+  <div class="events" id="events"></div>
+
+  <!-- Modal -->
+  <div class="modal-bg" id="modal-bg">
+    <div class="modal" id="modal">
+      <button class="modal-close" id="modal-close">&times;</button>
+      <img id="modal-img" src="" alt="">
+      <div class="modal-title" id="modal-title"></div>
+      <div class="modal-desc" id="modal-desc"></div>
+      <a id="modal-donate" class="modal-donate" href="#" target="_blank">Вызвать!</a>
+    </div>
+  </div>
+
+  <div class="howto">
+    <b>Как это работает?</b><br>
+    1. Выберите событие из списка ниже.<br>
+    2. Нажмите «Подробнее» и перейдите на страницу доната.<br>
+    3. Задонатьте нужную сумму — и событие появится на стриме!<br>
+    4. За <b>фоллоу</b> — получите рандомного питомца с вашим ником!
+  </div>
+  <div class="bonus-follow">
+    🎁 <b>За фоллоу</b> — бесплатный рандомный питомец с вашим ником прямо на стриме!
+  </div>
+
+  <script>
+    // Все события — номер соответствует номеру картинки (img/1.png, img/2.png, ...)
+    const events = [
+      { // 1
+        title: "Дождь из рыбы",
+        price: "15₽",
+        img: "img/1.png",
+        desc: "Рандомные рыбы падают с неба.",
+        donate: "https://streamelements.com/senorfootless/tip?amount=15&message=Дождь%20из%20рыбы"
+      },
+      { // 2
+        title: "Случайный предмет",
+        price: "20₽",
+        img: "img/2.png",
+        desc: "Выдаю себе случайный предмет.",
+        donate: "https://streamelements.com/senorfootless/tip?amount=20&message=Случайный%20предмет"
+      },
+      { // 3
+        title: "Летаю на свинье",
+        price: "30₽",
+        img: "img/3.png",
+        desc: "Летаю на свинье.",
+        donate: "https://streamelements.com/senorfootless/tip?amount=30&message=Летаю%20на%20свинье"
+      },
+      { // 4
+        title: "Голод, бегаю по еде!",
+        price: "35₽",
+        img: "img/4.png",
+        desc: "Стив бегает за курицей, ловит еду.",
+        donate: "https://streamelements.com/senorfootless/tip?amount=35&message=Голод"
+      },
+      { // 5
+        title: "Пропадает земля под ногами",
+        price: "40₽",
+        img: "img/5.png",
+        desc: "Под игроком внезапно исчезает земля (ловушка).",
+        donate: "https://streamelements.com/senorfootless/tip?amount=40&message=Пропадает%20земля"
+      },
+      { // 6
+        title: "Молния прямо в меня!",
+        price: "50₽",
+        img: "img/6.png",
+        desc: "В игрока ударяет молния. Эффектно и опасно!",
+        donate: "https://streamelements.com/senorfootless/tip?amount=50&message=Молния"
+      },
+      { // 7
+        title: "Взрыв TNT, подлет вверх",
+        price: "60₽",
+        img: "img/7.png",
+        desc: "TNT под игроком: взрыв и подлет вверх!",
+        donate: "https://streamelements.com/senorfootless/tip?amount=60&message=TNT"
+      },
+      { // 8
+        title: "Случайный негативный эффект",
+        price: "70₽",
+        img: "img/8.png",
+        desc: "Получаю яд, слепоту, голод или другой плохой эффект.",
+        donate: "https://streamelements.com/senorfootless/tip?amount=70&message=Эффект"
+      },
+      { // 9
+        title: "Тотем бессмертия",
+        price: "90₽",
+        img: "img/9.png",
+        desc: "Получаю тотем бессмертия!",
+        donate: "https://streamelements.com/senorfootless/tip?amount=90&message=Тотем"
+      },
+      { // 10
+        title: "Заряженный крипер с вашим ником!",
+        price: "100₽",
+        img: "img/10.png",
+        desc: "Появляется заряженный крипер, носит ваш ник!",
+        donate: "https://streamelements.com/senorfootless/tip?amount=100&message=Крипер"
+      },
+      { // 11
+        title: "Перемешиваю инвентарь",
+        price: "110₽",
+        img: "img/11.png",
+        desc: "Все вещи в инвентаре перемешиваются хаотично!",
+        donate: "https://streamelements.com/senorfootless/tip?amount=110&message=Инвентарь"
+      },
+      { // 12
+        title: "Огненный дождь (fireball’ы с неба)",
+        price: "120₽",
+        img: "img/12.png",
+        desc: "С неба падают огненные шары!",
+        donate: "https://streamelements.com/senorfootless/tip?amount=120&message=Огненный%20дождь"
+      },
+      { // 13
+        title: "Лёд под ногами",
+        price: "140₽",
+        img: "img/13.png",
+        desc: "Всё становится скользким — лёд под ногами.",
+        donate: "https://streamelements.com/senorfootless/tip?amount=140&message=Лёд"
+      },
+      { // 14
+        title: "Потоп (заливка водой)",
+        price: "150₽",
+        img: "img/14.png",
+        desc: "Всё вокруг внезапно заливает водой!",
+        donate: "https://streamelements.com/senorfootless/tip?amount=150&message=Потоп"
+      },
+      { // 15
+        title: "Телепортация в рандомное место",
+        price: "180₽",
+        img: "img/15.png",
+        desc: "Телепортируюсь в случайный мир и координаты.",
+        donate: "https://streamelements.com/senorfootless/tip?amount=180&message=Телепорт"
+      },
+      { // 16
+        title: "Лавовый душ, жарко!",
+        price: "200₽",
+        img: "img/16.png",
+        desc: "На игрока сверху льётся лавовый поток.",
+        donate: "https://streamelements.com/senorfootless/tip?amount=200&message=Лава"
+      },
+      { // 17
+        title: "Дождь из мобов (монстры нападают)",
+        price: "300₽",
+        img: "img/17.png",
+        desc: "Падает куча мобов! Монстры нападают.",
+        donate: "https://streamelements.com/senorfootless/tip?amount=300&message=Мобы"
+      },
+      { // 18
+        title: "Спавнится остров в небе + сундук",
+        price: "350₽",
+        img: "img/18.png",
+        desc: "В небе появляется остров и сундук с лутом.",
+        donate: "https://streamelements.com/senorfootless/tip?amount=350&message=Остров"
+      },
+      { // 19
+        title: "Крутейший сундук с топ-лутом",
+        price: "1000₽",
+        img: "img/19.png",
+        desc: "Большой сундук с лутом. Топовая награда!",
+        donate: "https://streamelements.com/senorfootless/tip?amount=1000&message=Сундук"
+      },
+      { // 20
+        title: "Рандомный питомец с вашим ником (за фоллоу)",
+        price: "0₽ (за фоллоу)",
+        img: "img/20.png",
+        desc: "Бесплатно за фоллоу: появится милый питомец с вашим ником.",
+        donate: "https://streamelements.com/senorfootless/tip?message=Фоллоу"
+      },
+    ];
+
+    // Рендер карточек
+    const eventsDiv = document.getElementById('events');
+    events.forEach((ev, i) => {
+      const card = document.createElement('div');
+      card.className = 'event-card';
+      card.innerHTML = `
+        <img src="${ev.img}" alt="${ev.title}">
+        <div class="event-title">${ev.title}</div>
+        <div class="event-price">${ev.price}</div>
+        <button class="event-btn" data-index="${i}">Подробнее</button>
+      `;
+      eventsDiv.appendChild(card);
+    });
+
+    // Modal logic
+    const modalBg = document.getElementById('modal-bg');
+    const modalImg = document.getElementById('modal-img');
+    const modalTitle = document.getElementById('modal-title');
+    const modalDesc = document.getElementById('modal-desc');
+    const modalDonate = document.getElementById('modal-donate');
+    document.querySelectorAll('.event-btn').forEach(btn => {
+      btn.onclick = e => {
+        const ev = events[btn.dataset.index];
+        modalImg.src = ev.img;
+        modalTitle.textContent = ev.title;
+        modalDesc.textContent = ev.desc;
+        modalDonate.href = ev.donate;
+        modalBg.classList.add('active');
+      };
+    });
+    document.getElementById('modal-close').onclick = () => modalBg.classList.remove('active');
+    modalBg.onclick = e => { if (e.target === modalBg) modalBg.classList.remove('active'); }
+  </script>
+</body>
+</html>
